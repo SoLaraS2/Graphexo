@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Graphexo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Graphexo Demo</h1>
+  <div id="plot"></div>
+  <button onclick="downloadPNG()">Download PNG</button>
+  <script src="graphexo.js"></script>
+  <script>
+    const data = {
+      type: 'scatter',
+      x: [1, 2, 3, 4, 5],
+      y: [10, 15, 13, 17, 21],
+      marker: { color: 'red' }
+    };
+    const layout = {
+      title: 'Sample Plot',
+      xaxis: { title: 'X Axis' },
+      yaxis: { title: 'Y Axis' }
+    };
+    plotGraph('plot', data, layout);
+  </script>
+</body>
+</html>
