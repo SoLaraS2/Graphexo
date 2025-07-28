@@ -1,21 +1,56 @@
 body {
-    font-family: sans-serif;
-    margin: 40px;
-    background-color: #f4f4f4;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f8f9fb;
+    padding: 40px;
     text-align: center;
   }
   
+  h1 {
+    color: #0079C1;
+  }
+  
+  #controls {
+    margin-bottom: 20px;
+  }
+  
   #plot {
-    display: inline-block;
-    background: white;
+    margin: auto;
+    background: #ffffff;
     border: 1px solid #ccc;
-    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+  }
+  
+  label, select, input[type="color"] {
+    margin: 0 10px;
+    font-size: 14px;
   }
   
   button {
     margin-top: 20px;
     padding: 10px 20px;
+    background-color: #0079C1;
+    border: none;
+    color: white;
     font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  button:hover {
+    background-color: #005f96;
+  }
+  
+  input[type="file"] {
+    margin-right: 15px;
+  }
+  
+  #colorPicker, #bgColorPicker {
+    vertical-align: middle;
+    height: 30px;
+    width: 40px;
+    padding: 0;
+    border: none;
     cursor: pointer;
   }
   

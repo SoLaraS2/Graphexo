@@ -7,23 +7,144 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Graphexo Demo</h1>
+  <h1>Graphexo</h1>
+  <div id="controls">
+    <input type="file" id="fileInput" accept=".csv" />
+    <label for="plotType">Plot Type:</label>
+    <select id="plotType">
+      <option value="scatter">Scatter</option>
+      <option value="line">Line</option>
+      <option value="bar">Bar</option>
+      <option value="area">Area</option>
+      <option value="pie">Pie</option>
+    </select>
+    <label for="colorPicker">Color:</label>
+    <input type="color" id="colorPicker" value="#ff0000" />
+    <label for="bgColorPicker">Background:</label>
+    <input type="color" id="bgColorPicker" value="#ffffff" />
+    <label for="colormap">Color Map:</label>
+    <select id="colormapPicker">
+        <option value="default">Default</option>
+        <option value="viridis">Viridis</option>
+        <option value="plasma">Plasma</option>
+        <option value="category10">Category10</option>
+        <option value="custom">Upload Custom</option>
+      </select>
+      <input type="file" id="customColormapUpload" style="display:none;" accept=".json">
+      
+  </div>
+
   <div id="plot"></div>
   <button onclick="downloadPNG()">Download PNG</button>
+
   <script src="graphexo.js"></script>
   <script>
-    const data = {
-      type: 'scatter',
-      x: [1, 2, 3, 4, 5],
-      y: [10, 15, 13, 17, 21],
-      marker: { color: 'red' }
-    };
-    const layout = {
-      title: 'Sample Plot',
-      xaxis: { title: 'X Axis' },
-      yaxis: { title: 'Y Axis' }
-    };
-    plotGraph('plot', data, layout);
+    let latestData = null;
+    let latestLayout = null;
+
+    const colorPicker = document.getElementById('colorPicker');
+    const bgColorPicker = document.getElementById('bgColorPicker');
+    const plotTypeSelector = document.getElementById('plotType');
+
+    function toggleControls() {
+        const type = plotTypeSelector.value;
+
+        const hide = type === 'pie';
+        document.querySelector("label[for='plotType']").style.display = hide ? 'none' : '';
+        plotTypeSelector.style.display = hide ? 'none' : '';
+        document.querySelector("label[for='colorPicker']").style.display = hide ? 'none' : '';
+        colorPicker.style.display = hide ? 'none' : '';
+
+        const cmapVisible = type === 'bar' || type === 'pie';
+        document.querySelector("label[for='colormap']").style.display = cmapVisible ? '' : 'none';
+        document.getElementById('colormapPicker').style.display = cmapVisible ? '' : 'none';
+        }
+
+
+    function renderLatest() {
+      if (!latestData || !latestLayout) return;
+
+      const type = plotTypeSelector.value;
+      toggleControls();
+
+      latestData.type = type;
+
+      if (type !== 'pie' && type !== 'bar') {
+        latestData.marker = { color: colorPicker.value };
+        }
+
+        // For bar/pie, we clear .marker so per-bar colors can be handled by getColor()
+        if (type === 'bar' || type === 'pie') {
+            latestData.marker = {};
+        }
+
+
+      plotGraph('plot', latestData, latestLayout);
+    }
+
+    plotTypeSelector.addEventListener('change', renderLatest);
+    colorPicker.addEventListener('input', renderLatest);
+    bgColorPicker.addEventListener('input', renderLatest);
+
+    document.getElementById('fileInput').addEventListener('change', function (event) {
+        resetPlotOptions();
+        const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const text = e.target.result.trim();
+        const lines = text.split('\n');
+        const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+
+        const color = colorPicker.value || 'red';
+
+        if (headers.includes('label') && headers.includes('value')) {
+          plotTypeSelector.value = 'pie';
+          const labels = [], y = [];
+
+          for (let i = 1; i < lines.length; i++) {
+            const [label, valueStr] = lines[i].split(',');
+            const value = parseFloat(valueStr);
+            if (label && !isNaN(value)) {
+              labels.push(label.trim());
+              y.push(value);
+            }
+          }
+
+          latestData = { type: 'pie', labels, y };
+          latestLayout = { title: 'Pie Chart' };
+        } else {
+          const x = [], y = [];
+
+          for (let i = 1; i < lines.length; i++) {
+            const [xi, yi] = lines[i].split(',').map(Number);
+            if (!isNaN(xi) && !isNaN(yi)) {
+              x.push(xi);
+              y.push(yi);
+            }
+          }
+
+          latestData = {
+            type: plotTypeSelector.value,
+            x, y,
+            marker: { color }
+          };
+
+          latestLayout = {
+            title: 'Uploaded CSV Plot',
+            xaxis: { title: 'X Values' },
+            yaxis: { title: 'Y Values' }
+          };
+        }
+
+        renderLatest();
+      };
+
+      reader.readAsText(file);
+    });
+    document.getElementById('colormapPicker').addEventListener('change', renderLatest);
+
   </script>
 </body>
 </html>
